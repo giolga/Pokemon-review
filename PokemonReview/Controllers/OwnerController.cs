@@ -80,7 +80,7 @@ namespace PokemonReview.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(204)]
         [ProducesResponseType(404)]
-        public IActionResult UpdateCategory(int ownerId, [FromBody] OwnerDto updatedOwner)
+        public IActionResult UpdateOwner(int ownerId, [FromBody] OwnerDto updatedOwner)
         {
             if (updatedOwner == null)
             {
@@ -116,7 +116,7 @@ namespace PokemonReview.Controllers
         [HttpPost]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        public IActionResult CreateCategory([FromQuery] int countryId, [FromBody] OwnerDto ownerCreate)
+        public IActionResult CreateOwner([FromQuery] int countryId, [FromBody] OwnerDto ownerCreate)
         {
             if (ownerCreate == null)
             {
@@ -147,6 +147,32 @@ namespace PokemonReview.Controllers
             }
 
             return Ok("Successfully Created");
+        }
+
+        [HttpDelete("{ownerId}")]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
+        public IActionResult DeleteOwner(int ownerId)
+        {
+            if (!_ownerRepository.OwnerExists(ownerId))
+            {
+                return NotFound();
+            }
+
+            var ownerDelete = _ownerRepository.GetOwner(ownerId);
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (!_ownerRepository.DeleteOwner(ownerDelete))
+            {
+                ModelState.AddModelError("", "Something went wrong deleting Owner");
+            }
+
+            return NoContent();
         }
     }
 }

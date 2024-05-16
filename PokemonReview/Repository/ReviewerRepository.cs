@@ -23,6 +23,12 @@ namespace PokemonReview.Repository
             return Save();
         }
 
+        public bool DeleteReviewer(Reviewer reviewer)
+        {
+            _context.Remove(reviewer);
+            return Save();
+        }
+
         public Reviewer GetReviewer(int reviewrId)
         {
             // Reviews -> Reviewer

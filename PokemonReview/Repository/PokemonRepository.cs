@@ -1,4 +1,5 @@
 ﻿using PokemonReview.Data;
+using PokemonReview.DTOs;
 using PokemonReview.Interfaces;
 using PokemonReview.Models;
 
@@ -7,6 +8,7 @@ namespace PokemonReview.Repository
     public class PokemonRepository : IPokemonRepository
     {
         private readonly DataContext _context;
+
         public PokemonRepository(DataContext context)
         {
             _context = context;
@@ -15,8 +17,9 @@ namespace PokemonReview.Repository
         public bool CreatePokemon(int ownerId, int categoryId, Pokemon pokemon)
         {
             var pokemonOwnerEntity = _context.Owners.Where(a => a.Id == ownerId).FirstOrDefault();
-            var category = _context.Categories.Where(c => c.Id == categoryId).FirstOrDefault();
-            var pokemonOwner = new PokemonOwner
+            var category = _context.Categories.Where(a => a.Id == categoryId).FirstOrDefault();
+
+            var pokemonOwner = new PokemonOwner()
             {
                 Owner = pokemonOwnerEntity,
                 Pokemon = pokemon,
@@ -24,14 +27,22 @@ namespace PokemonReview.Repository
 
             _context.Add(pokemonOwner);
 
-            var pokemonCategory = new PokemonCategory
+            var pokemonCategory = new PokemonCategory()
             {
                 Category = category,
-                Pokemon = pokemon
+                Pokemon = pokemon,
             };
 
             _context.Add(pokemonCategory);
 
+            _context.Add(pokemon);
+
+            return Save();
+        }
+
+        public bool DeletePokemon(Pokemon pokemon)
+        {
+            _context.Remove(pokemon);
             return Save();
         }
 
@@ -47,13 +58,12 @@ namespace PokemonReview.Repository
 
         public decimal GetPokemonRating(int pokeId)
         {
-            var review = _context.Reviews.Where(p => p.Id == pokeId);
-            if (review.Count() <= 0)
-            {
-                return 0;
-            }
+            var review = _context.Reviews.Where(p => p.Pokemon.Id == pokeId);
 
-            return (decimal)review.Sum(r => r.Rating) / review.Count();
+            if (review.Count() <= 0)
+                return 0;
+
+            return ((decimal)review.Sum(r => r.Rating) / review.Count());
         }
 
         public ICollection<Pokemon> GetPokemons()
@@ -61,9 +71,14 @@ namespace PokemonReview.Repository
             return _context.Pokemon.OrderBy(p => p.Id).ToList();
         }
 
-        public bool PokemonExists(int id)
+        public Pokemon GetPokemonTrimToUpper(PokemonDto pokemonCreate)
         {
-            return _context.Pokemon.Any(p => p.Id == id);
+            return GetPokemons().Where(c => c.Name.Trim().ToUpper() == pokemonCreate.Name.TrimEnd().ToUpper()).FirstOrDefault();
+        }
+
+        public bool PokemonExists(int pokeId)
+        {
+            return _context.Pokemon.Any(p => p.Id == pokeId);
         }
 
         public bool Save()
