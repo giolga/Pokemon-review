@@ -13,15 +13,18 @@ namespace PokemonReview.Controllers
     {
         private readonly IReviewRepository _reviewRepository;
         private readonly IMapper _mapper;
-        private readonly IPokemonRepository _pokemonRepositoy;
         private readonly IReviewerRepository _reviewerRepository;
+        private readonly IPokemonRepository _pokemonRepository;
 
-        public ReviewController(IReviewRepository reviewRepository, IMapper mapper, IPokemonRepository pokemonRepositoy, IReviewerRepository reviewerRepository)
+        public ReviewController(IReviewRepository reviewRepository,
+            IMapper mapper,
+            IPokemonRepository pokemonRepository,
+            IReviewerRepository reviewerRepository)
         {
-            this._reviewRepository = reviewRepository;
-            this._mapper = mapper;
-            this._pokemonRepositoy = pokemonRepositoy;
-            this._reviewerRepository = reviewerRepository;
+            _reviewRepository = reviewRepository;
+            _mapper = mapper;
+            _reviewerRepository = reviewerRepository;
+            _pokemonRepository = pokemonRepository;
         }
 
         [HttpGet]
@@ -101,7 +104,7 @@ namespace PokemonReview.Controllers
 
             var reviewMap = _mapper.Map<Review>(reviewCreate);
 
-            reviewMap.Pokemon = _pokemonRepositoy.GetPokemon(pokeId);
+            reviewMap.Pokemon = _pokemonRepository.GetPokemon(pokeId);
             reviewMap.Reviewer = _reviewerRepository.GetReviewer(reviewerId);
 
             if (!_reviewRepository.CreateReview(reviewMap))
@@ -111,6 +114,43 @@ namespace PokemonReview.Controllers
             }
 
             return Ok("Successfully created!");
+        }
+
+        [HttpPut("{reviewerId}")]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
+        public IActionResult UpdateCategory(int reviewerId, [FromBody] ReviewerDto updatedreviewer)
+        {
+            if (updatedreviewer == null)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (reviewerId != updatedreviewer.Id)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (!_reviewerRepository.ReviewerExist(reviewerId))
+            {
+                return NotFound();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var reviewerMap = _mapper.Map<Reviewer>(updatedreviewer);
+
+            if (!_reviewerRepository.UpdateReviewer(reviewerMap))
+            {
+                ModelState.AddModelError("", "Something went wrong updating owner");
+                return StatusCode(500, ModelState);
+            }
+
+            return NoContent();
         }
     }
 }

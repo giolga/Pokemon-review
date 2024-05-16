@@ -67,3 +67,4 @@ C:\Users\GioLGA\Desktop\MyProjects\PokemonReview\PokemonReview\obj\Debug\net6.0\
 C:\Users\GioLGA\Desktop\MyProjects\PokemonReview\PokemonReview\obj\Debug\net6.0\PokemonReview.genruntimeconfig.cache
 C:\Users\GioLGA\Desktop\MyProjects\PokemonReview\PokemonReview\obj\Debug\net6.0\ref\PokemonReview.dll
 C:\Users\GioLGA\Desktop\MyProjects\PokemonReview\PokemonReview\bin\Debug\net6.0\AutoMapper.dll
+C:\Users\GioLGA\Desktop\MyProjects\PokemonReview\PokemonReview\obj\Debug\net6.0\PokemonReview.sourcelink.json

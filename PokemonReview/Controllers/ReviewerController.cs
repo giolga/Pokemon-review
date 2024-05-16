@@ -12,11 +12,13 @@ namespace PokemonReview.Controllers
     public class ReviewerController : Controller
     {
         private readonly IReviewerRepository _reviewerRepository;
+        private readonly IReviewRepository _reviewRepository;
         private readonly IMapper _mapper;
 
         public ReviewerController(IReviewerRepository reviewerRepository, IMapper mapper)
         {
             this._reviewerRepository = reviewerRepository;
+            
             this._mapper = mapper;
         }
 
@@ -109,5 +111,41 @@ namespace PokemonReview.Controllers
             return Ok("Successfully created!");
         }
 
+        [HttpPut("{reviewrId}")]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
+        public IActionResult UpdateCategory(int reviewId, [FromBody] ReviewDto updatedreview)
+        {
+            if (updatedreview == null)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (reviewId != updatedreview.Id)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (!_reviewRepository.ReviewExists(reviewId))
+            {
+                return NotFound();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var reviewMap = _mapper.Map<Review>(updatedreview);
+
+            if (!_reviewRepository.UpdateReview(reviewMap))
+            {
+                ModelState.AddModelError("", "Something went wrong updating review");
+                return StatusCode(500, ModelState);
+            }
+
+            return NoContent();
+        }
     }
 }
